@@ -1,0 +1,72 @@
+/* Estilos para el menú, manteniendo la jerarquía visual */
+.menu {
+  width: 100%; /* Ocupa todo el ancho del sidebar */
+  font-family: 'Segoe UI', sans-serif;
+  padding: 0.5rem 0; /* Espacio vertical */
+}
+
+/* Estilo para el BOTÓN que controla el módulo */
+.module-toggle {
+  /* Apariencia de texto normal, pero es un botón */
+  background: none;
+  border: none;
+  padding: 0.75rem 1rem; /* Espaciado interno */
+  width: 100%;
+  text-align: left;
+  cursor: pointer;
+  
+  /* Estilo de fuente del módulo */
+  font-weight: bold;
+  font-size: 16px;
+  color: #111;
+
+  /* Usamos flexbox para alinear la flecha y el texto */
+  display: flex;
+  align-items: center;
+}
+
+.module-toggle:hover {
+  background-color: #f0f0f0;
+}
+
+/* Flecha indicadora */
+.module-toggle::before {
+  content: '▶'; /* Flecha apuntando a la derecha por defecto */
+  margin-right: 10px;
+  font-size: 10px;
+  transition: transform 0.2s ease-in-out;
+}
+
+.module-toggle.expanded::before {
+  transform: rotate(90deg); /* Flecha apuntando hacia abajo cuando está expandido */
+}
+
+/* Contenedor de los subtemas */
+.subtopic-container {
+  /* La sangría clave para la jerarquía */
+  padding-left: 24px;
+  margin-top: 6px;
+  border-left: 2px solid #e0e0e0;
+  margin-left: 1rem; /* Alinea el borde con el texto del módulo */
+  padding-bottom: 0.5rem;
+}
+
+/* Estilo para cada subtema */
+.subtopic {
+  display: block;
+  font-weight: normal;
+  font-size: 14px;
+  color: #444;
+  text-decoration: none;
+  padding: 0.3rem 0;
+}
+
+.subtopic:hover {
+  color: #000;
+  text-decoration: underline;
+}
+
+.subtopic.active {
+  font-weight: bold;
+  color: #0d6efd;
+}

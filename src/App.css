@@ -1,0 +1,49 @@
+:root {
+  --rebus-black: #111111;
+  --rebus-gold: #BFA55A;
+  --rebus-steel: #666666;
+  --rebus-white: #FFFFFF;
+  --sidebar-width: 280px; /* Variable para el ancho del sidebar */
+}
+
+.wrapper {
+  display: flex;
+  width: 100%;
+  align-items: stretch;
+  height: 100vh;
+}
+
+#content {
+  width: calc(100% - var(--sidebar-width));
+  padding: 20px;
+  min-height: 100vh;
+  transition: all 0.3s;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Nueva clase para cuando el sidebar no está presente */
+#content.full-width {
+  width: 100%;
+}
+
+.main-content {
+  flex-grow: 1;
+}
+
+/* Estilos para asegurar que el layout ocupe toda la altura */
+#root, .App, .App > div {
+  height: 100%;
+}
+
+main {
+  background-color: var(--rebus-white);
+}
+
+.bg-rebus-dark {
+  background-color: var(--rebus-black) !important;
+}
+
+.text-rebus-gold {
+  color: var(--rebus-gold) !important;
+}
