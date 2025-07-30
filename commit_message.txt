@@ -1,0 +1,1 @@
+feat: Initial project setup with authentication and protected routes.

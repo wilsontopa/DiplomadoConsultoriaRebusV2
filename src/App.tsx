@@ -111,7 +111,7 @@ function App() {
               <Route 
                 path="/modulos/:moduleId/item/:itemId" 
                 element={
-                  <ProtectedRoute>
+                  <ProtectedRoute menu={menu}>
                     <ModuleViewer />
                   </ProtectedRoute>
                 }

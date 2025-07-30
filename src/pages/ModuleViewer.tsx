@@ -1,39 +1,68 @@
 import React, { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import VideoPlayer from '../components/VideoPlayer';
 import HtmlContent from '../components/HtmlContent';
 import ActivityViewer from '../components/ActivityViewer';
 import ResourcesViewer from '../components/ResourcesViewer';
-// Importamos tanto la función como el tipo de dato que devuelve.
-// Usamos "import type" para la interfaz para asegurar que no se incluya en el build final.
 import { getModuleContent } from '../services/moduleService';
 import type { ModuleItemContent } from '../services/moduleService';
+import type { MenuItem } from '../App';
+// Importar funciones del servicio de progreso
+import { isItemCompleted, markItemCompleted } from '../services/progressService';
 
-const ModuleViewer: React.FC = () => {
+interface ModuleViewerProps {
+  menu: MenuItem[];
+}
+
+const ModuleViewer: React.FC<ModuleViewerProps> = ({ menu }) => {
   const { moduleId, itemId } = useParams<{ moduleId: string; itemId: string }>();
+  const navigate = useNavigate();
   const [content, setContent] = useState<ModuleItemContent | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
+  // Estado para controlar si el ítem actual está completado
+  const [completed, setCompleted] = useState(false);
+
+  // Usaremos un ID de usuario fijo por ahora para las pruebas
+  const userId = 'defaultUser'; 
+
+  // Lógica para encontrar el ítem actual y los ítems anterior/siguiente
+  const currentModuleSubtopics = menu.filter(
+    (item) => item.type === 'subtopic' && item.moduleId === moduleId
+  );
+  const currentItemIndex = currentModuleSubtopics.findIndex(
+    (item) => item.id === itemId
+  );
+
+  const prevItem = currentItemIndex > 0 ? currentModuleSubtopics[currentItemIndex - 1] : null;
+  const nextItem = currentItemIndex < currentModuleSubtopics.length - 1 ? currentModuleSubtopics[currentItemIndex + 1] : null;
 
   useEffect(() => {
-    // Aseguramos que tenemos los IDs antes de hacer la llamada.
     if (moduleId && itemId) {
       setIsLoading(true);
       const fetchContent = async () => {
         const data = await getModuleContent(moduleId, itemId);
         setContent(data);
         setIsLoading(false);
+        // Verificar el estado de completado del ítem al cargar
+        setCompleted(isItemCompleted(userId, moduleId, itemId));
       };
 
       fetchContent();
     }
-  }, [moduleId, itemId]); // El efecto se ejecuta cada vez que cambia el módulo o el ítem.
+  }, [moduleId, itemId, userId]); // Añadir userId a las dependencias
 
-  // Renderizado condicional basado en el estado de carga.
+  // Función para marcar el ítem como completado
+  const handleMarkCompleted = () => {
+    if (moduleId && itemId) {
+      markItemCompleted(userId, moduleId, itemId);
+      setCompleted(true);
+    }
+  };
+
   if (isLoading) {
     return <div>Cargando contenido...</div>;
   }
 
-  // Si no hay contenido o el tipo es 'error', mostramos un mensaje.
   if (!content || content.type === 'error') {
     const errorMessage = typeof content?.data === 'string' 
       ? content.data 
@@ -41,7 +70,6 @@ const ModuleViewer: React.FC = () => {
     return <div className="alert alert-danger">{errorMessage}</div>;
   }
 
-  // Función para renderizar el componente correcto según el tipo de contenido.
   const renderContent = () => {
     switch (content.type) {
       case 'html':
@@ -53,14 +81,44 @@ const ModuleViewer: React.FC = () => {
       case 'resources':
         return <ResourcesViewer resources={content.data} />;
       default:
-        // Esto no debería ocurrir si manejamos todos los casos, pero es una buena práctica tenerlo.
         return <div className="alert alert-warning">Tipo de contenido no soportado.</div>;
     }
   };
 
   return (
-    <div>
+    <div className="module-viewer-container">
       {renderContent()}
+
+      <div className="d-flex justify-content-between mt-4">
+        <button
+          className="btn btn-primary"
+          onClick={() => navigate(`/modulos/${prevItem?.moduleId}/item/${prevItem?.id}`)}
+          disabled={!prevItem}
+        >
+          Anterior
+        </button>
+        
+        {completed ? (
+          <span className="badge bg-success fs-5 p-2">
+            <i className="bi bi-check-circle-fill me-2"></i>Completado
+          </span>
+        ) : (
+          <button
+            className="btn btn-success"
+            onClick={handleMarkCompleted}
+          >
+            Marcar como Completado
+          </button>
+        )}
+
+        <button
+          className="btn btn-primary"
+          onClick={() => navigate(`/modulos/${nextItem?.moduleId}/item/${nextItem?.id}`)}
+          disabled={!nextItem}
+        >
+          Siguiente
+        </button>
+      </div>
     </div>
   );
 };
