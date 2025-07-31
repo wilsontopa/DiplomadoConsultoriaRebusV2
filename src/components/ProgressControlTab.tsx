@@ -1,15 +1,16 @@
+
 import React, { useState, useEffect, useCallback } from 'react';
 import {
   getAllUsersProgress,
   isItemCompleted,
   toggleItemCompletion,
-  resetUserProgress
+  resetUserProgress,
+  resetFinalAIAnalysis // Importar la nueva función
 } from '../services/progressService';
 import { baseMenu } from '../App';
 import type { MenuItem } from '../App';
 
 const ProgressControlTab: React.FC = () => {
-  // Movemos la lógica aquí para evitar el error de inicialización
   const courseModules = baseMenu.filter(item => item.type === 'module' && baseMenu.some(sub => sub.parentId === item.id));
 
   const [usersProgress, setUsersProgress] = useState<{ [userId: string]: any }>({});
@@ -32,6 +33,13 @@ const ProgressControlTab: React.FC = () => {
   const handleResetProgress = (userId: string) => {
     if (window.confirm(`¿Estás seguro de que quieres reiniciar todo el progreso del usuario "${userId}"?`)) {
       resetUserProgress(userId);
+      loadProgressData();
+    }
+  };
+
+  const handleResetAIAnalysis = (userId: string) => {
+    if (window.confirm(`¿Estás seguro de que quieres reiniciar el análisis de IA para el usuario "${userId}"?`)) {
+      resetFinalAIAnalysis(userId);
       loadProgressData();
     }
   };
@@ -84,12 +92,20 @@ const ProgressControlTab: React.FC = () => {
                   </div>
                 ))}
                 <hr />
-                <button 
-                  className="btn btn-danger mt-2" 
-                  onClick={() => handleResetProgress(userId)}
-                >
-                  Reiniciar Progreso Total
-                </button>
+                <div className="d-flex justify-content-between">
+                  <button 
+                    className="btn btn-danger mt-2" 
+                    onClick={() => handleResetProgress(userId)}
+                  >
+                    Reiniciar Progreso Total
+                  </button>
+                  <button 
+                    className="btn btn-warning mt-2" 
+                    onClick={() => handleResetAIAnalysis(userId)}
+                  >
+                    Reiniciar Análisis IA
+                  </button>
+                </div>
               </div>
             )}
           </div>

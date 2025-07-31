@@ -1,4 +1,3 @@
-
 // Definimos la estructura para los resultados de una evaluación
 export interface EvaluationResult {
   score: number;
@@ -178,4 +177,18 @@ export const resetUserProgress = (userId: string): void => {
   }
   saveAllUsersProgress(allProgress);
   console.log("resetUserProgress: Guardado exitoso.");
+};
+
+export const resetFinalAIAnalysis = (userId: string): void => {
+  console.log(`resetFinalAIAnalysis: Llamada para userId: ${userId}`);
+  const allProgress = getAllUsersProgress();
+  if (allProgress[userId]?.finalAIAnalysis) {
+    delete allProgress[userId].finalAIAnalysis;
+    // Si el usuario no tiene progreso modular, eliminamos la entrada del usuario
+    if (!allProgress[userId].modularProgress || Object.keys(allProgress[userId].modularProgress).length === 0) {
+      delete allProgress[userId];
+    }
+  }
+  saveAllUsersProgress(allProgress);
+  console.log("resetFinalAIAnalysis: Guardado exitoso.");
 };

@@ -1,7 +1,8 @@
 import type { EvaluationResult } from '../services/progressService';
 
 const GEMINI_API_KEY = import.meta.env.VITE_GEMINI_API_KEY;
-const GEMINI_API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${GEMINI_API_KEY}`;
+// Usamos el modelo gemini-1.5-pro que es más reciente y compatible
+const GEMINI_API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro:generateContent?key=${GEMINI_API_KEY}`;
 
 const callGeminiApi = async (prompt: string): Promise<string> => {
   if (!GEMINI_API_KEY) {
@@ -26,7 +27,6 @@ const callGeminiApi = async (prompt: string): Promise<string> => {
     }
 
     const data = await response.json();
-    // Asegurarse de que la respuesta tenga el formato esperado
     if (data.candidates && data.candidates.length > 0 && data.candidates[0].content && data.candidates[0].content.parts && data.candidates[0].content.parts.length > 0) {
       return data.candidates[0].content.parts[0].text;
     } else {
@@ -81,7 +81,7 @@ export const getFinalAnalysis = async (
               if (Object.prototype.hasOwnProperty.call(result.answers, questionId)) {
                 const answer = result.answers[questionId];
                 if (typeof answer === 'string' && answer.length > 50) {
-                  prompt += `    Respuesta a pregunta de texto libre (${questionId}): \"${answer}\"\n`;
+                  prompt += `    Respuesta a pregunta de texto libre (${questionId}): "${answer}"\n`;
                 }
               }
             }
@@ -92,8 +92,8 @@ export const getFinalAnalysis = async (
     }
   }
 
-  prompt += `El dilema que se le presentó al estudiante fue:\n\"${generatedDilemma}\"\n\n`;
-  prompt += `Y el estudiante respondió al dilema con:\n\"${dilemmaResponse}\"\n\n`;
+  prompt += `El dilema que se le presentó al estudiante fue:\n"${generatedDilemma}"\n\n`;
+  prompt += `Y el estudiante respondió al dilema con:\n"${dilemmaResponse}"\n\n`;
   prompt += `Basado en todos estos datos, proporciona una retroalimentación constructiva y detallada sobre su desempeño general, sus fortalezas, áreas de mejora y cómo su respuesta al dilema se alinea con los principios de la consultoría estratégica. Sé conciso pero informativo.`;
 
   console.log("Prompt para análisis final:", prompt);
