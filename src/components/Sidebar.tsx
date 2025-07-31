@@ -28,6 +28,22 @@ const Sidebar: React.FC<SidebarProps> = ({ menu }) => {
 
       <div className="menu">
         {modules.map(module => {
+          // Si el módulo tiene una ruta directa, renderizar un NavLink
+          if (module.path) {
+            return (
+              <NavLink
+                key={module.id}
+                to={module.path}
+                className={({ isActive }) => 
+                  "module-link" + (isActive ? " active" : "") // Usar una clase específica para enlaces de módulo
+                }
+              >
+                {module.label}
+              </NavLink>
+            );
+          }
+
+          // Si no tiene una ruta directa, renderizar como un módulo desplegable
           const isExpanded = openModules.includes(module.id);
           return (
             <div key={module.id}>

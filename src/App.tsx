@@ -1,5 +1,6 @@
-import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
-import React, { useState, useEffect } from 'react'; // Importar useState y useEffect
+
+import { BrowserRouter as Router, Route, Routes, useParams } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
 import Header from './components/Header';
 import Sidebar from './components/Sidebar';
 import Footer from './components/Footer';
@@ -7,112 +8,94 @@ import Home from './pages/Home';
 import ModuleViewer from './pages/ModuleViewer';
 import LoginPage from './pages/LoginPage';
 import ProtectedRoute from './components/ProtectedRoute';
+import EvaluationPage from './pages/EvaluationPage';
+import AdminPanelPage from './pages/AdminPanelPage';
 import './App.css';
-import { isAuthenticated } from './services/authService'; // Importar isAuthenticated
+import { getCurrentUser } from './services/authService';
+import type { User } from './services/authService';
 
-// Definimos el tipo de dato para cada item del menú, como especificaste.
 export type MenuItem = {
   id: string;
   label: string;
   type: 'module' | 'subtopic';
-  // El ID del módulo al que pertenece el subtema.
-  // Para los módulos, este será su propio ID para simplificar la navegación.
-  moduleId: string; 
+  moduleId: string;
   parentId?: string;
+  path?: string;
+  allowedRoles?: ('administrator' | 'student')[];
 };
 
-// Creamos el menú con la nueva estructura jerárquica.
-const menu: MenuItem[] = [
-  {
-    id: 'mod-0', 
-    label: 'Módulo 0: Introducción', 
-    type: 'module',
-    moduleId: '0'
-  },
-  {
-    id: 'intro', 
-    label: 'Bienvenida', 
-    type: 'subtopic', 
-    parentId: 'mod-0',
-    moduleId: '0'
-  },
-  {
-    id: 'contenido-0', // ID único para el contenido del módulo 0
-    label: 'Fundamentos de Consultoría', 
-    type: 'subtopic', 
-    parentId: 'mod-0',
-    moduleId: '0'
-  },
-  {
-    id: 'mod-1', 
-    label: 'Módulo 1: Estrategia', 
-    type: 'module',
-    moduleId: '1'
-  },
-  {
-    id: 'intro-1', // ID único para la intro del módulo 1
-    label: '¿Qué es la Estrategia?', 
-    type: 'subtopic', 
-    parentId: 'mod-1',
-    moduleId: '1'
-  },
-  {
-    id: 'contenido', 
-    label: 'Análisis Competitivo', 
-    type: 'subtopic', 
-    parentId: 'mod-1',
-    moduleId: '1'
-  },
-  {
-    id: 'actividad', 
-    label: 'Caso Práctico: FODA', 
-    type: 'subtopic', 
-    parentId: 'mod-1',
-    moduleId: '1'
-  },
-  {
-    id: 'recursos', 
-    label: 'Lecturas Recomendadas', 
-    type: 'subtopic', 
-    parentId: 'mod-1',
-    moduleId: '1'
-  },
+export const baseMenu: MenuItem[] = [
+    { id: 'mod-0', label: 'Módulo 0: Introducción', type: 'module', moduleId: '0' },
+    { id: 'intro-0', label: 'Bienvenida', type: 'subtopic', parentId: 'mod-0', moduleId: '0' },
+    { id: 'contenido-0', label: 'Fundamentos de Consultoría', type: 'subtopic', parentId: 'mod-0', moduleId: '0' },
+    { id: 'evaluacion-0', label: 'Evaluación del Módulo 0', type: 'subtopic', parentId: 'mod-0', moduleId: '0' },
+    { id: 'mod-1', label: 'Módulo 1: Estrategia', type: 'module', moduleId: '1' },
+    { id: 'intro-1', label: '¿Qué es la Estrategia?', type: 'subtopic', parentId: 'mod-1', moduleId: '1' },
+    { id: 'contenido-1', label: 'Análisis Competitivo', type: 'subtopic', parentId: 'mod-1', moduleId: '1' },
+    { id: 'actividad-1', label: 'Caso Práctico: FODA', type: 'subtopic', parentId: 'mod-1', moduleId: '1' },
+    { id: 'recursos-1', label: 'Lecturas Recomendadas', type: 'subtopic', parentId: 'mod-1', moduleId: '1' },
+    { id: 'evaluacion', label: 'Evaluación Final', type: 'module', moduleId: 'evaluacion', path: '/evaluacion' },
 ];
 
+const adminMenuItem: MenuItem = {
+  id: 'admin-panel',
+  label: 'Panel de Administración',
+  type: 'module',
+  moduleId: 'admin',
+  path: '/admin',
+  allowedRoles: ['administrator'],
+};
+
+// Componente Wrapper para aplicar la key y forzar el re-renderizado
+const ModuleViewerWrapper: React.FC<{ menu: MenuItem[] }> = ({ menu }) => {
+  const { moduleId, itemId } = useParams<{ moduleId: string; itemId: string }>();
+  return <ModuleViewer key={`${moduleId}-${itemId}`} menu={menu} />;
+};
+
 function App() {
-  // Estado para controlar si el usuario está autenticado
-  const [authenticated, setAuthenticated] = useState(isAuthenticated());
+  const [user, setUser] = useState<User | null>(null);
+  const [menu, setMenu] = useState<MenuItem[]>(baseMenu);
+  const [isLoading, setIsLoading] = useState(true);
 
-  // useEffect para escuchar cambios en localStorage (por si se abre en otra pestaña, etc.)
   useEffect(() => {
-    const handleStorageChange = () => {
-      setAuthenticated(isAuthenticated());
-    };
-
-    window.addEventListener('storage', handleStorageChange);
-    return () => {
-      window.removeEventListener('storage', handleStorageChange);
-    };
+    console.log("App.tsx: localStorage.getItem('diplomadoProgress') al inicio:", localStorage.getItem('diplomadoProgress'));
+    const currentUser = getCurrentUser();
+    if (currentUser) {
+      setUser(currentUser);
+      if (currentUser.role === 'administrator') {
+        setMenu([...baseMenu, adminMenuItem]);
+      }
+    }
+    setIsLoading(false);
   }, []);
+
+  if (isLoading) {
+    return <div>Cargando...</div>;
+  }
 
   return (
     <Router>
       <div className="wrapper">
-        {/* Pasamos el nuevo menú al Sidebar solo si el usuario está autenticado */}
-        {authenticated && <Sidebar menu={menu} />}
-        <div id="content" className={authenticated ? "" : "full-width"}>
-          {/* Pasamos setAuthenticated a Header para que pueda actualizar el estado al cerrar sesión */}
-          <Header setAuthenticated={setAuthenticated} />
+        {user && <Sidebar menu={menu} />}
+        <div id="content" className={user ? "" : "full-width"}>
+          <Header user={user} />
           <main className="main-content">
             <Routes>
-              {/* Pasamos setAuthenticated a LoginPage para que pueda actualizar el estado al iniciar sesión */}
-              <Route path="/" element={<Home authenticated={authenticated} />} />
-              <Route path="/login" element={<LoginPage setAuthenticated={setAuthenticated} />} />
+              <Route path="/login" element={<LoginPage />} />
+              <Route path="/" element={<ProtectedRoute user={user}><Home /></ProtectedRoute>} />
               <Route 
                 path="/modulos/:moduleId/item/:itemId" 
+                element={<ProtectedRoute user={user}><ModuleViewerWrapper menu={menu} /></ProtectedRoute>}
+              />
+              <Route 
+                path="/evaluacion" 
+                element={<ProtectedRoute user={user}><EvaluationPage /></ProtectedRoute>}
+              />
+              <Route 
+                path="/admin" 
                 element={
-                  <ProtectedRoute menu={menu}>
-                    <ModuleViewer />
+                  <ProtectedRoute user={user} allowedRoles={['administrator']}>
+                    <AdminPanelPage />
                   </ProtectedRoute>
                 }
               />

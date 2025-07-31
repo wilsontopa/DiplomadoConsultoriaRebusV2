@@ -41,6 +41,25 @@
   transform: rotate(90deg); /* Flecha apuntando hacia abajo cuando está expandido */
 }
 
+/* Estilo para los enlaces directos de módulos (como Evaluación Final) */
+.module-link {
+  display: block;
+  padding: 0.75rem 1rem; /* Mismo padding que module-toggle */
+  font-weight: bold;
+  font-size: 16px;
+  color: #111;
+  text-decoration: none;
+}
+
+.module-link:hover {
+  background-color: #f0f0f0;
+  color: #000;
+}
+
+.module-link.active {
+  color: #0d6efd;
+}
+
 /* Contenedor de los subtemas */
 .subtopic-container {
   /* La sangría clave para la jerarquía */

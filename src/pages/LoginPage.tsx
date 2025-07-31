@@ -2,11 +2,8 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { login } from '../services/authService';
 
-interface LoginPageProps {
-  setAuthenticated: (isAuthenticated: boolean) => void;
-}
-
-const LoginPage: React.FC<LoginPageProps> = ({ setAuthenticated }) => {
+// Ya no necesitamos las props para setAuthenticated
+const LoginPage: React.FC = () => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -15,12 +12,14 @@ const LoginPage: React.FC<LoginPageProps> = ({ setAuthenticated }) => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError(''); // Limpiar errores previos
+    setError('');
 
     const result = await login(username, password);
     if (result.success) {
-      setAuthenticated(true); // Actualizar el estado de autenticación en App.tsx
-      navigate('/'); // Redirigir a la página principal al iniciar sesión
+      // Forzamos un refresco de la página para que App.tsx 
+      // recargue el estado de autenticación desde localStorage.
+      // Esto asegura que el estado del usuario (incluido el rol) esté disponible globalmente.
+      window.location.href = '/';
     } else {
       setError(result.message || 'Error de autenticación desconocido.');
     }

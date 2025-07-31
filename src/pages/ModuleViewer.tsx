@@ -1,14 +1,17 @@
+
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import VideoPlayer from '../components/VideoPlayer';
 import HtmlContent from '../components/HtmlContent';
 import ActivityViewer from '../components/ActivityViewer';
 import ResourcesViewer from '../components/ResourcesViewer';
+import ModuleEvaluation from '../components/ModuleEvaluation'; // Importar el nuevo componente
 import { getModuleContent } from '../services/moduleService';
 import type { ModuleItemContent } from '../services/moduleService';
 import type { MenuItem } from '../App';
-// Importar funciones del servicio de progreso
+// Importamos los servicios necesarios
 import { isItemCompleted, markItemCompleted } from '../services/progressService';
+import { getCurrentUser } from '../services/authService';
 
 interface ModuleViewerProps {
   menu: MenuItem[];
@@ -19,13 +22,11 @@ const ModuleViewer: React.FC<ModuleViewerProps> = ({ menu }) => {
   const navigate = useNavigate();
   const [content, setContent] = useState<ModuleItemContent | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
-  // Estado para controlar si el ítem actual está completado
   const [completed, setCompleted] = useState(false);
 
-  // Usaremos un ID de usuario fijo por ahora para las pruebas
-  const userId = 'defaultUser'; 
+  const currentUser = getCurrentUser();
+  const userId = currentUser?.username || 'anonymous'; 
 
-  // Lógica para encontrar el ítem actual y los ítems anterior/siguiente
   const currentModuleSubtopics = menu.filter(
     (item) => item.type === 'subtopic' && item.moduleId === moduleId
   );
@@ -37,25 +38,31 @@ const ModuleViewer: React.FC<ModuleViewerProps> = ({ menu }) => {
   const nextItem = currentItemIndex < currentModuleSubtopics.length - 1 ? currentModuleSubtopics[currentItemIndex + 1] : null;
 
   useEffect(() => {
-    if (moduleId && itemId) {
+    console.log("ModuleViewer useEffect: moduleId=", moduleId, ", itemId=", itemId, ", userId=", userId);
+    if (moduleId && itemId && userId !== 'anonymous') {
       setIsLoading(true);
       const fetchContent = async () => {
         const data = await getModuleContent(moduleId, itemId);
         setContent(data);
         setIsLoading(false);
-        // Verificar el estado de completado del ítem al cargar
-        setCompleted(isItemCompleted(userId, moduleId, itemId));
+        const isItemComp = isItemCompleted(userId, moduleId, itemId);
+        setCompleted(isItemComp);
+        console.log(`ModuleViewer: isItemCompleted(${userId}, ${moduleId}, ${itemId}) = ${isItemComp}`);
       };
 
       fetchContent();
+    } else if (userId === 'anonymous') {
+        console.error("No se pudo obtener el usuario para registrar el progreso.");
+        setIsLoading(false);
     }
-  }, [moduleId, itemId, userId]); // Añadir userId a las dependencias
+  }, [moduleId, itemId, userId]);
 
-  // Función para marcar el ítem como completado
   const handleMarkCompleted = () => {
-    if (moduleId && itemId) {
+    console.log("handleMarkCompleted: userId=", userId, ", moduleId=", moduleId, ", itemId=", itemId);
+    if (moduleId && itemId && userId !== 'anonymous') {
       markItemCompleted(userId, moduleId, itemId);
       setCompleted(true);
+      console.log("handleMarkCompleted: setCompleted(true) called.");
     }
   };
 
@@ -80,6 +87,8 @@ const ModuleViewer: React.FC<ModuleViewerProps> = ({ menu }) => {
         return <ActivityViewer activity={content.data} />;
       case 'resources':
         return <ResourcesViewer resources={content.data} />;
+      case 'evaluation': // Nuevo caso para evaluaciones
+        return <ModuleEvaluation evaluation={content.data} moduleId={moduleId!} itemId={itemId!} />;
       default:
         return <div className="alert alert-warning">Tipo de contenido no soportado.</div>;
     }

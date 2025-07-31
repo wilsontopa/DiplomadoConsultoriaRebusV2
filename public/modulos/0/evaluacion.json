@@ -1,0 +1,36 @@
+{
+  "title": "Evaluación del Módulo 0: Fundamentos de Consultoría",
+  "questions": [
+    {
+      "id": "q1",
+      "question": "¿Cuál es el objetivo principal de la consultoría estratégica?",
+      "type": "single-choice",
+      "options": [
+        "Aumentar las ventas a corto plazo",
+        "Resolver problemas complejos y mejorar el rendimiento organizacional a largo plazo",
+        "Reducir costos operativos",
+        "Gestionar el personal de la empresa"
+      ],
+      "correctAnswer": "Resolver problemas complejos y mejorar el rendimiento organizacional a largo plazo"
+    },
+    {
+      "id": "q2",
+      "question": "¿Qué habilidades son cruciales para un consultor?",
+      "type": "multiple-choice",
+      "options": [
+        "Análisis de datos",
+        "Comunicación efectiva",
+        "Programación avanzada",
+        "Resolución de problemas",
+        "Diseño gráfico"
+      ],
+      "correctAnswer": ["Análisis de datos", "Comunicación efectiva", "Resolución de problemas"]
+    },
+    {
+      "id": "q3",
+      "question": "Explica brevemente la importancia de la ética en la consultoría.",
+      "type": "text",
+      "correctAnswer": "La ética es fundamental para construir confianza con el cliente, asegurar la objetividad de las recomendaciones y mantener la reputación profesional. Un consultor ético prioriza los intereses del cliente y actúa con integridad."
+    }
+  ]
+}

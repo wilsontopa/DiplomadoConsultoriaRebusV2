@@ -1,21 +1,28 @@
+
 import React from 'react';
 import { Navigate } from 'react-router-dom';
-import { isAuthenticated } from '../services/authService';
-import type { MenuItem } from '../App'; // Importar MenuItem
+import type { User } from '../services/authService';
 
 interface ProtectedRouteProps {
-  children: React.ReactElement; // Cambiado a React.ReactElement para poder clonar
-  menu: MenuItem[]; // Añadir la prop menu
+  children: React.ReactElement;
+  user: User | null;
+  allowedRoles?: ('administrator' | 'student')[];
 }
 
-const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, menu }) => {
-  if (!isAuthenticated()) {
-    // Si el usuario no está autenticado, redirigir a la página de login
+const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, user, allowedRoles }) => {
+  // 1. Si no hay usuario, no está autenticado.
+  if (!user) {
     return <Navigate to="/login" replace />;
   }
 
-  // Si el usuario está autenticado, clonar el elemento hijo y pasarle la prop menu
-  return React.cloneElement(children, { menu });
+  // 2. Si se requiere un rol específico y el usuario no lo tiene, redirigir.
+  if (allowedRoles && !allowedRoles.includes(user.role)) {
+    // Redirigimos a la página de inicio porque no tiene permiso.
+    return <Navigate to="/" replace />;
+  }
+
+  // 3. Si pasa todas las validaciones, renderizar el contenido protegido.
+  return children;
 };
 
 export default ProtectedRoute;

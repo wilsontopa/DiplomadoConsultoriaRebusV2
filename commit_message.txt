@@ -1,1 +1,1 @@
-feat: Initial project setup with authentication and protected routes.
+feat: Implementado servicio de progreso y visualización de ítems completados.
