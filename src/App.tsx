@@ -8,7 +8,8 @@ import Home from './pages/Home';
 import ModuleViewer from './pages/ModuleViewer';
 import LoginPage from './pages/LoginPage';
 import ProtectedRoute from './components/ProtectedRoute';
-import EvaluationPage from './pages/EvaluationPage';
+import FinalEvaluationPage from './pages/FinalEvaluationPage';
+
 import AdminPanelPage from './pages/AdminPanelPage';
 import './App.css';
 import { getCurrentUser } from './services/authService';
@@ -34,7 +35,8 @@ export const baseMenu: MenuItem[] = [
     { id: 'contenido-1', label: 'Análisis Competitivo', type: 'subtopic', parentId: 'mod-1', moduleId: '1' },
     { id: 'actividad-1', label: 'Caso Práctico: FODA', type: 'subtopic', parentId: 'mod-1', moduleId: '1' },
     { id: 'recursos-1', label: 'Lecturas Recomendadas', type: 'subtopic', parentId: 'mod-1', moduleId: '1' },
-    { id: 'evaluacion', label: 'Evaluación Final', type: 'module', moduleId: 'evaluacion', path: '/evaluacion' },
+    { id: 'evaluacion-final', label: 'Evaluación Final', type: 'module', moduleId: 'evaluacion', path: '/evaluacion-final' },
+    
 ];
 
 const adminMenuItem: MenuItem = {
@@ -53,21 +55,29 @@ const ModuleViewerWrapper: React.FC<{ menu: MenuItem[] }> = ({ menu }) => {
 };
 
 function App() {
-  const [user, setUser] = useState<User | null>(null);
-  const [menu, setMenu] = useState<MenuItem[]>(baseMenu);
-  const [isLoading, setIsLoading] = useState(true);
-
-  useEffect(() => {
-    console.log("App.tsx: localStorage.getItem('diplomadoProgress') al inicio:", localStorage.getItem('diplomadoProgress'));
+  const [user, setUser] = useState<User | null>(getCurrentUser());
+  const [menu, setMenu] = useState<MenuItem[]>(() => {
     const currentUser = getCurrentUser();
-    if (currentUser) {
-      setUser(currentUser);
-      if (currentUser.role === 'administrator') {
-        setMenu([...baseMenu, adminMenuItem]);
-      }
+    if (currentUser && currentUser.role === 'administrator') {
+      return [...baseMenu, adminMenuItem];
     }
-    setIsLoading(false);
-  }, []);
+    return baseMenu;
+  });
+  const [isLoading, setIsLoading] = useState(false); // No es necesario si se inicializa el estado directamente
+
+  // Efecto para manejar cambios de menú en login/logout
+  useEffect(() => {
+    if (user) {
+      if (user.role === 'administrator' && !menu.find(item => item.id === 'admin-panel')) {
+        setMenu(prevMenu => [...prevMenu, adminMenuItem]);
+      } else if (user.role !== 'administrator') {
+        setMenu(baseMenu);
+      }
+    } else {
+      // Si el usuario cierra sesión, restaurar el menú base
+      setMenu(baseMenu);
+    }
+  }, [user]);
 
   if (isLoading) {
     return <div>Cargando...</div>;
@@ -87,10 +97,12 @@ function App() {
                 path="/modulos/:moduleId/item/:itemId" 
                 element={<ProtectedRoute user={user}><ModuleViewerWrapper menu={menu} /></ProtectedRoute>}
               />
+              
               <Route 
-                path="/evaluacion" 
-                element={<ProtectedRoute user={user}><EvaluationPage /></ProtectedRoute>}
+                path="/evaluacion-final" 
+                element={<ProtectedRoute user={user}><FinalEvaluationPage /></ProtectedRoute>}
               />
+              
               <Route 
                 path="/admin" 
                 element={

@@ -1,1 +1,1 @@
-feat: Implementado servicio de progreso y visualización de ítems completados.
+feat: Implementacion inicial de Gemini AI para evaluacion final

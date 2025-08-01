@@ -2,15 +2,12 @@ import React from 'react';
 
 interface HtmlContentProps {
   html: string;
+  className?: string; // Añadimos className para pasar estilos desde el padre
 }
 
-const HtmlContent: React.FC<HtmlContentProps> = ({ html }) => {
+const HtmlContent: React.FC<HtmlContentProps> = ({ html, className }) => {
   return (
-    <div className="card mb-4">
-      <div className="card-body">
-        <div dangerouslySetInnerHTML={{ __html: html }} />
-      </div>
-    </div>
+    <div className={className} dangerouslySetInnerHTML={{ __html: html }} />
   );
 };
 

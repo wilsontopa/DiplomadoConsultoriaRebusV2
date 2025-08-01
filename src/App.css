@@ -47,3 +47,7 @@ main {
 .text-rebus-gold {
   color: var(--rebus-gold) !important;
 }
+
+.text-justify {
+  text-align: justify;
+}

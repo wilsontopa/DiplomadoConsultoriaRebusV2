@@ -86,12 +86,7 @@ export const getEvaluationResult = (userId: string, moduleId: string, itemId: st
   return result;
 };
 
-export const getFinalAIAnalysis = (userId: string): FinalAIAnalysisResult | null => {
-  const allProgress = getAllUsersProgress();
-  const analysis = allProgress[userId]?.finalAIAnalysis || null;
-  console.log(`getFinalAIAnalysis(${userId}):`, analysis);
-  return analysis;
-};
+
 
 // --- FUNCIONES DE ESCRITURA ---
 
@@ -122,14 +117,7 @@ export const saveEvaluationResult = (userId: string, moduleId: string, itemId: s
   console.log("saveEvaluationResult: Guardado exitoso.");
 };
 
-export const saveFinalAIAnalysis = (userId: string, analysis: FinalAIAnalysisResult): void => {
-  console.log(`saveFinalAIAnalysis: Llamada para userId: ${userId}`);
-  const allProgress = getAllUsersProgress();
-  ensureUserStructure(allProgress, userId);
-  allProgress[userId].finalAIAnalysis = analysis;
-  saveAllUsersProgress(allProgress);
-  console.log("saveFinalAIAnalysis: Guardado exitoso.");
-};
+
 
 export const unmarkItemAsCompleted = (userId: string, moduleId: string, itemId: string): void => {
   console.log(`unmarkItemAsCompleted: Llamada para userId: ${userId}, moduleId: ${moduleId}, itemId: ${itemId}`);
